@@ -32,8 +32,10 @@ import org.openqa.selenium.phantomjs.PhantomJSDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
 import java.lang.reflect.Constructor;
+import java.net.URL;
 import java.util.Collections;
 import java.util.List;
+import org.openqa.selenium.remote.RemoteWebDriver;
 
 /**
  * Creates a WebDriver for TestMojo using configured properties.
@@ -86,7 +88,9 @@ public class WebDriverFactory {
     if (PhantomJSDriver.class.getName().equals(webDriverClassName)) {
       return createPhantomJsWebDriver();
     } else if (HtmlUnitDriver.class.getName().equals(webDriverClassName)) {
-      return createHtmlUnitWebDriver();
+	  return createHtmlUnitWebDriver();
+	} else if (RemoteWebDriver.class.getName().equals(webDriverClassName)) {
+	  return createRemoteWebDriver();
     } else {
       return createCustomWebDriver();
     }
@@ -146,6 +150,12 @@ public class WebDriverFactory {
     }
   }
 
+  private WebDriver createRemoteWebDriver() throws Exception {
+    DesiredCapabilities capabilities = new DesiredCapabilities();
+    customizeCapabilities(capabilities);
+    return new RemoteWebDriver(new URL((String)capabilities.getCapability("selenium.server.url")), capabilities);
+  }
+  
   private WebDriver createHtmlUnitWebDriver() throws Exception {
     DesiredCapabilities capabilities = DesiredCapabilities.htmlUnitWithJs();
     if (StringUtils.isNotBlank(capabilities.getVersion())) {
